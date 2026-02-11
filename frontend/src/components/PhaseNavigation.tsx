@@ -57,8 +57,10 @@ export default function PhaseNavigation() {
             if (devData.accessToken) {
               token = devData.accessToken
               // Save for next time
-              localStorage.setItem('auth_token', token)
-              console.log('✅ Development token obtained automatically')
+              if (token) {
+                localStorage.setItem('auth_token', token)
+                console.log('✅ Development token obtained automatically')
+              }
             }
           }
         } catch (devTokenError) {
