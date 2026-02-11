@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phase Progression Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #0a0e27;
+            color: #e1e7ef;
+        }
+        h1 {
+            color: #3b9eff;
+        }
+        .token-section {
+            background: #1a1f38;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            font-family: monospace;
+            background: #0a0e27;
+            border: 1px solid #3b9eff;
+            color: #e1e7ef;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #3b9eff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #2a7fd9;
+        }
+        .phase {
+            background: #1a1f38;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #666;
+        }
+        .phase.completed {
+            border-left-color: #10b981;
+        }
+        .phase.current {
+            border-left-color: #3b9eff;
+        }
+        .phase.locked {
+            opacity: 0.6;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status.completed {
+            background: #10b981;
+            color: white;
+        }
+        .status.current {
+            background: #3b9eff;
+            color: white;
+        }
+        .status.locked {
+            background: #4b5563;
+            color: #9ca3af;
+        }
+        .actions {
+            margin-top: 10px;
+        }
+        .actions button {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        .error {
+            background: #ef4444;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .success {
+            background: #10b981;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧊 Phase Progression Test</h1>
+
+    <div class="token-section">
+        <h3>JWT Token</h3>
+        <input type="text" id="tokenInput" placeholder="Paste JWT token here..." />
+        <button onclick="saveToken()">Save Token</button>
+        <button onclick="loadPhases()">Load Phases</button>
+    </div>
+
+    <div id="message"></div>
+    <div id="phases"></div>
+
+    <script>
+        const API_URL = 'http://localhost:3000';
+
+        // Load token from localStorage on page load
+        window.onload = function() {
+            const savedToken = localStorage.getItem('auth_token');
+            if (savedToken) {
+                document.getElementById('tokenInput').value = savedToken;
+                loadPhases();
+            }
+        };
+
+        function saveToken() {
+            const token = document.getElementById('tokenInput').value.trim();
+            if (token) {
+                localStorage.setItem('auth_token', token);
+                showMessage('Token saved!', 'success');
+            } else {
+                showMessage('Please enter a token', 'error');
+            }
+        }
+
+        function getToken() {
+            return document.getElementById('tokenInput').value.trim() || localStorage.getItem('auth_token');
+        }
+
+        function showMessage(msg, type) {
+            const div = document.getElementById('message');
+            div.className = type;
+            div.textContent = msg;
+            setTimeout(() => div.textContent = '', 3000);
+        }
+
+        async function loadPhases() {
+            const token = getToken();
+            if (!token) {
+                showMessage('Please enter a token first', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/phases`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const phases = await response.json();
+                renderPhases(phases);
+                showMessage('Phases loaded successfully!', 'success');
+            } catch (error) {
+                showMessage(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        function renderPhases(phases) {
+            const container = document.getElementById('phases');
+            container.innerHTML = '<h2>Phase Progression</h2>';
+
+            phases.forEach((phase, index) => {
+                const div = document.createElement('div');
+                div.className = `phase ${phase.status}`;
+
+                const emoji = {
+                    deliverability: '📧',
+                    core_flows: '🔄',
+                    segmentation: '🎯',
+                    conversion_measurement: '📊',
+                    cro_observation: '🔍',
+                    revenue_activation: '💰',
+                    offer_construction: '🎁',
+                    paid_acquisition: '🚀'
+                }[phase.phase] || '📍';
+
+                let html = `
+                    <strong>Phase ${index + 1}: ${emoji} ${phase.name}</strong>
+                    <span class="status ${phase.status}">${phase.status.toUpperCase()}</span>
+                    <p>${phase.description}</p>
+                `;
+
+                if (phase.completedAt) {
+                    const date = new Date(phase.completedAt).toLocaleString();
+                    html += `<p style="font-size: 12px; color: #10b981;">✓ Completed: ${date}</p>`;
+                }
+
+                if (phase.unlocked && phase.status !== 'completed') {
+                    html += `
+                        <div class="actions">
+                            <button onclick="completePhase('${phase.phase}')">
+                                ✓ Mark as Complete
+                            </button>
+                        </div>
+                    `;
+                }
+
+                div.innerHTML = html;
+                container.appendChild(div);
+            });
+        }
+
+        async function completePhase(phaseId) {
+            const token = getToken();
+            if (!token) {
+                showMessage('Please enter a token first', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/phases/${phaseId}/complete`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                showMessage(result.message, 'success');
+
+                // Reload phases to show updated state
+                setTimeout(() => loadPhases(), 500);
+            } catch (error) {
+                showMessage(`Error: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

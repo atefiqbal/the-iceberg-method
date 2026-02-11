@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-ice-800;
+  }
+
+  body {
+    @apply bg-ice-950 text-ice-100;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-ice-900;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-ocean-700 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-ocean-600;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-8 py-4 bg-ocean-600 text-white font-display font-semibold rounded-lg
+           hover:bg-ocean-500 transition-all duration-300 transform hover:scale-105
+           shadow-lg shadow-ocean-900/50 hover:shadow-xl hover:shadow-ocean-800/60;
+  }
+
+  .btn-secondary {
+    @apply px-8 py-4 bg-transparent border-2 border-ocean-600 text-ocean-400 font-display font-semibold rounded-lg
+           hover:bg-ocean-950 hover:border-ocean-500 transition-all duration-300;
+  }
+
+  .glass-card {
+    @apply bg-ice-900/40 backdrop-blur-xl border border-ice-800/50 rounded-2xl
+           shadow-xl shadow-ice-950/50;
+  }
+
+  .metric-card {
+    @apply glass-card p-6 hover:bg-ice-900/60 transition-all duration-300
+           hover:border-ocean-700/50 hover:shadow-ocean-900/30;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-ocean-400 to-ice-200 bg-clip-text text-transparent;
+  }
+
+  .noise-texture {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  }
+}
+
+@layer utilities {
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+
+  .animation-delay-600 {
+    animation-delay: 600ms;
+  }
+
+  .animation-delay-800 {
+    animation-delay: 800ms;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
